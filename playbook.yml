@@ -5,19 +5,9 @@
     - include_vars: vars.yml
 
   pre_tasks:
-    - name: Local - git add
-      local_action: command git add ../*
+    - name: Local - git add, commit, push
+      local_action: shell cd .. && git add ./* && git commit -m '{{ commit|default("none") }}' && git push origin {{ branch }}
       tags: ['commit', 'deploy']
-
-    - name: Local - git commit
-      local_action: command git commit -m '{{ commit|default("none") }}'
-      tags: ['commit', 'deploy']
-      ignore_errors: yes
-
-    - name: Local - git push
-      local_action: command git push origin {{ branch }}
-      tags: ['commit', 'deploy']
-
 
   roles:
     - { role: common, tags: ["setup"] }
