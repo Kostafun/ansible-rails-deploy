@@ -1,6 +1,0 @@
----
-#dependencies:
-#  - { role: common, user: bk, tags: ["setup"] }
-#  - { role: rvm_io.rvm1-ruby, tags: ["rvm", "setup"] }
-#  - { role: postgresql, tags: ["postgresql", "setup"] }
-#  - { role: sbaerlocher.redis, tags: ["redis", "setup"] }

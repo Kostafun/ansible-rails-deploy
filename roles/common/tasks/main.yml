@@ -1,3 +1,5 @@
+- include: 'rails_init.yml'
+
 - name: 'apt | update'
   apt: update_cache=yes
 

@@ -1,4 +1,17 @@
 ---
 
+- name: Detect rvm binary
+  stat: path='{{ rvm_bin }}'
+  register: rvm_binary
+
 - include: 'rvm.yml'
+  when: not rvm_binary.stat.exists
+
+
+
+- name: Detect bundler
+  stat: path='{{ gem_bins_path }}/bundle'
+  register: bundler_binary
+
 - include: 'rubies.yml'
+  when: not bundler_binary.stat.exists

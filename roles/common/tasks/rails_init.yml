@@ -10,4 +10,4 @@
     rails_release_path: "{{ rails_path_app }}/releases/{{ rails_release }}"
     rails_current_path: "{{ rails_path_app }}/current"
 #    gem_home: "{{ rails_path_app }}/gems"
-    gem_bins_path: "{{ rvm1_install_path }}/gems/{{ rvm1_default_ruby_version }}/wrappers/"
+    gem_bins_path: "{{ rvm_install_path }}/gems/{{ gemset }}/wrappers/"

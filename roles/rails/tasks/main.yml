@@ -1,8 +1,11 @@
-- include: 'init.yml'
-  tags: ["always"]
+---
 
 - include: 'prepare.yml'
   tags: ["setup"]
 
 - include: 'deploy.yml'
   tags: ["deploy", "checkout"]
+
+- include: 'webpack.yml'
+  tags: ["deploy", "checkout", "webpack"]
+  when: do_webpack

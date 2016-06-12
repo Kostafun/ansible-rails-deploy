@@ -1,72 +1,65 @@
 ---
+- block:
 
-- name: rails prepare - copy ssh private key
-  copy: 'src=id_rsa dest={{ home }}/.ssh/id_rsa owner={{ user }} group={{ user }} mode=0600'
-  when: not skip_rails_prepare
+  - name: rails prepare - copy ssh private key
+    copy: 'src=../../../config/id_rsa dest={{ home }}/.ssh/id_rsa owner={{ user }} group={{ user }} mode=0600'
 
-- name: rails prepare - copy ssh public key
-  copy: 'src=id_rsa.pub dest={{ home }}/.ssh/id_rsa.pub owner={{ user }} group={{ user }} mode=0644'
-  when: not skip_rails_prepare
+  - name: rails prepare - copy ssh public key
+    copy: 'src=../../../config/id_rsa.pub dest={{ home }}/.ssh/id_rsa.pub owner={{ user }} group={{ user }} mode=0644'
 
-- name: rails prepare - copy /etc/gemrs
-  copy: 'src=gemrc dest=/etc/gemrc owner=root group=root mode=0644'
-  when: not skip_rails_prepare
+  - name: rails prepare - copy /etc/gemrs
+    copy: 'src=gemrc dest=/etc/gemrc owner=root group=root mode=0644'
 
-- name: rails prepare - create app dirs
-  file:
-    dest: "{{ item }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
-    mode: 0755
-    recurse: yes
-    state: directory
-  with_items:
-    - "{{ rails_path_app }}/releases"
-    - "{{ rails_path_app }}/shared/log"
-    - "{{ rails_path_app }}/shared/pids"
-    - "{{ rails_path_app }}/shared/tmp"
-    - "{{ rails_path_app }}/shared/config/unicorn"
-  become_user: "{{ user }}"
-  become: yes
-  when: not skip_rails_prepare
+  - name: rails prepare - create app dirs
+    file:
+      dest: "{{ item }}"
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: 0755
+      recurse: yes
+      state: directory
+    with_items:
+      - "{{ rails_path_app }}/releases"
+      - "{{ rails_path_app }}/shared/log"
+      - "{{ rails_path_app }}/shared/pids"
+      - "{{ rails_path_app }}/shared/tmp"
+      - "{{ rails_path_app }}/shared/config/unicorn"
+    become_user: "{{ user }}"
+    become: yes
 
-- name: rails prepare - create unicorn conf dir
-  file:
-    dest: /etc/unicorn
-    state: directory
-  when: not skip_rails_prepare
+  - name: rails prepare - create unicorn conf dir
+    file:
+      dest: /etc/unicorn
+      state: directory
 
-- name: rails prepare - create unicorn config
-  template: src=unicorn-app.j2 dest=/etc/unicorn/{{ app_name }}.conf owner=root group=root mode=0644
-  when: not skip_rails_prepare
+  - name: rails prepare - create unicorn config
+    template: src=unicorn-app.j2 dest=/etc/unicorn/{{ app_name }}.conf owner=root group=root mode=0644
 
-- name: Install unicorn init script
-  copy: src=etc/init.d/unicorn dest=/etc/init.d/unicorn owner=root group=root mode=0755
-  when: not skip_rails_prepare
+  - name: Install unicorn init script
+    copy: src=etc/init.d/unicorn dest=/etc/init.d/unicorn owner=root group=root mode=0755
 
-- name: Create unicorn config directory
-  file: dest=/etc/unicorn state=directory owner=root group=root mode=0755
-  when: not skip_rails_prepare
+  - name: Create unicorn config directory
+    file: dest=/etc/unicorn state=directory owner=root group=root mode=0755
 
-- name: rails prepare - create unicorn.rb
-  template: src=unicorn_rb.j2 dest={{ rails_path_app }}/shared/config/unicorn/unicorn.rb owner={{ user }} group={{ user }}
-  become_user: "{{ user }}"
-  become: yes
-  when: not skip_rails_prepare
+  - name: rails prepare - create unicorn.rb
+    template: src=unicorn_rb.j2 dest={{ rails_path_app }}/shared/config/unicorn/unicorn.rb owner={{ user }} group={{ user }}
+    become_user: "{{ user }}"
+    become: yes
 
-- name: Nginx | Configure apps
-  template: src=nginx-app.conf.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf group=www-data owner=www-data force=yes
-  #when: not skip_rails_prepare
+  - name: Nginx | Configure apps
+    template: src=nginx-app.conf.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf group=www-data owner=www-data force=yes
 
-- name: Nginx | Enable apps
-  file: path=/etc/nginx/sites-enabled/{{ app_name }}.conf src=/etc/nginx/sites-available/{{ app_name }}.conf state=link
-  ignore_errors: yes
-  when: not skip_rails_prepare
+  - name: Nginx | Enable apps
+    file: path=/etc/nginx/sites-enabled/{{ app_name }}.conf src=/etc/nginx/sites-available/{{ app_name }}.conf state=link
+    ignore_errors: yes
+
+when: not skip_rails_prepare
 
 - name: rails prepare - create role
   postgresql_user: login_user=postgres name={{ user }} password={{ db_pass }} role_attr_flags=CREATEDB,NOSUPERUSER
   become_user: postgres
   become: yes
+
 
 
 

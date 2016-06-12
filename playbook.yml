@@ -2,7 +2,7 @@
 - hosts: backends
   remote_user: root
   vars:
-    - include_vars: vars.yml
+    - include_vars: config/vars.yml
 
   pre_tasks:
     - name: Local - git add, commit, push
@@ -11,13 +11,7 @@
 
   roles:
     - { role: common, tags: ["setup"] }
-    #- backends
-    #- { role: rvm_io.rvm1-ruby, rvm1_rubies: ["ruby-2.3.1"], tags: ["rvm", "setup"] }
 
-
-    #- role: zzet.postgresql
-    #  pg_version: 9.4
-    #  pg_postgis: true
     - { role: postgresql, when: not skip_pg, tags: ["postgresql", "setup"] }
 
     - { role: sbaerlocher.redis, when: not skip_redis, tags: ["redis", "setup"] }

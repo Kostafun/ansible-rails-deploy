@@ -1,128 +1,79 @@
 ---
 
-- name: rails deploy - Fetching application sources
-  git:
-    repo: "{{ repo }}"
-    dest: "{{ rails_release_path }}"
-    clone: yes
-    depth: 1
-    recursive: yes
-    accept_hostkey: True
-    version: "{{ branch }}"
-  become: yes
-  become_user: "{{ user }}"
+block:
+  - name: rails deploy - Fetching application sources
+    git: repo="{{ repo }}" dest="{{ rails_release_path }}" clone=yes depth=1 recursive=yes accept_hostkey=True version="{{ branch }}"
 
-- name: rails deploy - remove destinations for links
-  file:
-    dest: "{{ rails_release_path }}/{{ item }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
-    state: absent
-  with_items:
-    - log
-    - pids
-    - tmp
-    - 'config/unicorn'
-  become_user: "{{ user }}"
-  become: yes
-  ignore_errors: yes
+  - name: rails deploy - remove destinations for links
+    file: dest="{{ rails_release_path }}/{{ item }}" owner="{{ user }}" group="{{ user }}" state=absent
+    with_items: ['log','pids','tmp','config/unicorn']
+    ignore_errors: yes
 
-- name: rails deploy - create symlinks in release
-  file:
-    src: "{{ rails_path_app }}/shared/{{ item }}"
-    dest: "{{ rails_release_path }}/{{ item }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
-    state: link
-  with_items:
-    - log
-    - pids
-    - tmp
-    - 'config/unicorn'
-  become_user: "{{ user }}"
-  become: yes
+  - name: rails deploy - create symlinks in release
+    file: src="{{ rails_path_app }}/shared/{{ item }}" dest="{{ rails_release_path }}/{{ item }}" owner="{{ user }}" group="{{ user }}" state=link
+    with_items: ['log','pids','tmp','config/unicorn']
 
-- name: rails deploy - bundle install
-  bundler:
-    chdir: "{{ rails_release_path }}"
-    state: present
-    deployment_mode: false
-    exclude_groups: development
-    executable: "{{ gem_bins_path }}/bundle"
-#    gem_path: "{{ gem_home }}"
-  become_user: "{{ user }}"
-  become: yes
-#  environment:
-#    GEM_HOME: "{{ gem_home }}"
+  - name: rails deploy - bundle install
+    bundler: chdir="{{ rails_release_path }}" state=present deployment_mode=false exclude_groups=development executable="{{ gem_bins_path }}/bundle"
 
-- name: write database.yml
-  template: src=database.yml.j2 dest={{ rails_release_path }}/config/database.yml owner={{ user }} group={{ user }}
-  become_user: "{{ user }}"
-  become: yes
+  - name: write database.yml
+    template: src=database.yml.j2 dest={{ rails_release_path }}/config/database.yml owner={{ user }} group={{ user }}
 
-#- name: check if db exists
-#  shell: psql -lqt | cut -d \| -f 1 | grep -qw {{ user }}
-#  register: db_exists
-#  ignore_errors: True
-#  become_user: postgres
-#  become: true
+  - name: rails deploy - Create db
+    command: '{{ gem_bins_path }}/bundle exec rake db:create'
+    environment:
+      RAILS_ENV: '{{ rails_env }}'
+    args:
+      chdir: '{{ rails_release_path }}'
 
-- name: rails deploy - Create db
-  command: '{{ gem_bins_path }}/bundle exec rake db:create'
-  environment:
-    RAILS_ENV: '{{ rails_env }}'
-  args:
-    chdir: '{{ rails_release_path }}'
-  become_user: "{{ user }}"
-  become: yes
-  #when: db_exists|false
+  - name: rails deploy - db migrate
+    command: '{{ gem_bins_path }}/bundle exec rake db:migrate'
+    environment:
+      RAILS_ENV: '{{ rails_env }}'
+    args:
+      chdir: '{{ rails_release_path }}'
+    ignore_errors: yes
 
-- name: rails deploy - db migrate
-  command: '{{ gem_bins_path }}/bundle exec rake db:migrate'
-  environment:
-    RAILS_ENV: '{{ rails_env }}'
-#    GEM_HOME: "{{ gem_home }}"
-  args:
-    chdir: '{{ rails_release_path }}'
-  become_user: "{{ user }}"
-  become: yes
-  ignore_errors: yes
+  - name: rails deploy - Precompile assets
+    command: '{{ gem_bins_path }}/bundle exec rake assets:precompile'
+    environment:
+      RAILS_ENV: '{{ rails_env }}'
+  #    GEM_HOME: "{{ gem_home }}"
+    args:
+      chdir: '{{ rails_release_path }}'
+    when: do_precompile_assets
 
-- name: rails deploy - Precompile assets
-  command: '{{ gem_bins_path }}/bundle exec rake assets:precompile'
-  environment:
-    RAILS_ENV: '{{ rails_env }}'
-#    GEM_HOME: "{{ gem_home }}"
-  args:
-    chdir: '{{ rails_release_path }}'
-  become_user: "{{ user }}"
-  become: yes
+  - name: rails deploy - get releases
+    shell: ls -1t {{ rails_path_app }}/releases/ | tail -n +{{ rails_keep_releases + 1 }}
+    register: rails_releases_dirs
 
-- name: rails deploy - get releases
-  shell: ls -1t {{ rails_path_app }}/releases/ | tail -n +{{ rails_keep_releases + 1 }}
-  register: rails_releases_dirs
+  - name: rails deploy - remove old releases
+    file:
+      dest: "{{ rails_path_app }}/releases/{{ item }}"
+      state: absent
+    with_items: "{{ rails_releases_dirs.stdout_lines }}"
+    when: "{{ item | match('\\d{14}') }}"
 
-- name: rails deploy - remove old releases
-  file:
-    dest: "{{ rails_path_app }}/releases/{{ item }}"
-    state: absent
-  with_items: "{{ rails_releases_dirs.stdout_lines }}"
-  when: "{{ item | match('\\d{14}') }}"
-  become_user: "{{ user }}"
-  become: yes
+  - name: rails deploy - activate the new release
+    file:
+      src: "{{ rails_release_path }}"
+      dest: "{{ rails_current_path }}"
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      state: link
+    notify:
+      - restart app
+      - restart nginx
 
-- name: rails deploy - activate the new release
-  file:
-    src: "{{ rails_release_path }}"
-    dest: "{{ rails_current_path }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
-    state: link
-  notify:
-    - restart app
-    - restart nginx
-  become_user: "{{ user }}"
-  become: yes
+
+become: yes
+become_user: "{{ user }}"
+
+
+
+
+
+
 
 - debug: msg="prepare runned"
   when: not skip_rails_prepare

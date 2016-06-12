@@ -3,7 +3,7 @@ upstream unicorn {
 }
 
 server {
-  server_name _;
+  server_name {{ domains }};
   listen 80;
   root {{ rails_current_path }}/public;
 
