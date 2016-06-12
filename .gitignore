@@ -1,0 +1,10 @@
+
+/.idea/
+/vars/vars.yml
+/roles/backends.back/
+/roles/rails/files/id_rsa
+/roles/rails/files/id_rsa.pub
+/move_db.yml
+/ansible.iml
+/roles/rails/templates/nginx-app.conf.j2-with-ssl
+/keys/

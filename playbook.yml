@@ -1,0 +1,36 @@
+---
+- hosts: backends
+  remote_user: root
+  vars:
+    - include_vars: vars.yml
+
+  pre_tasks:
+    - name: Local - git add
+      local_action: command git add ../*
+      tags: ['commit', 'deploy']
+
+    - name: Local - git commit
+      local_action: command git commit -m '{{ commit|default("none") }}'
+      tags: ['commit', 'deploy']
+      ignore_errors: yes
+
+    - name: Local - git push
+      local_action: command git push origin {{ branch }}
+      tags: ['commit', 'deploy']
+
+
+  roles:
+    - { role: common, tags: ["setup"] }
+    #- backends
+    #- { role: rvm_io.rvm1-ruby, rvm1_rubies: ["ruby-2.3.1"], tags: ["rvm", "setup"] }
+
+
+    #- role: zzet.postgresql
+    #  pg_version: 9.4
+    #  pg_postgis: true
+    - { role: postgresql, when: not skip_pg, tags: ["postgresql", "setup"] }
+
+    - { role: sbaerlocher.redis, when: not skip_redis, tags: ["redis", "setup"] }
+
+    - { role: rvm, tags: ["rvm", "setup"] }
+    - { role: rails }
