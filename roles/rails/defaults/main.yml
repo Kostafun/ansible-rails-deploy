@@ -1,0 +1,7 @@
+---
+
+#repo: 'git@bitbucket.org:kostafun/bookarails2.git'
+#branch: 'refactoring'
+rails_keep_releases: 3
+rails_env: production
+unicorn_workers: 5

@@ -1,0 +1,29 @@
+- name: set skips to false
+  set_fact:
+    skip_rails_prepare: false
+    skip_pg: false
+    skip_redis: false
+
+- name: rails prepare - skip all setup steps if /etc/nginx/sites-enabled/{{ app_name }}.conf exists
+  stat: path=/etc/nginx/sites-enabled/{{ app_name }}.conf
+  register: skip_rails_prep
+
+- name: skip rails prepare
+  set_fact: skip_rails_prepare=true
+  when: (skip_rails_prep.stat.islnk is defined) and skip_rails_prep.stat.islnk and fast_run
+
+- name: skip postgresql install if /run/postgresql/9.4-main.pid exists
+  stat: path=/run/postgresql/9.4-main.pid
+  register: skip_postgres
+
+- name: skip postgres
+  set_fact: skip_pg=true
+  when: (skip_rails_prep.stat is defined) and skip_rails_prep.stat.exists and fast_run
+
+- name: skip redis if /run/redis/redis-server.pid exists
+  stat: path=/run/redis/redis-server.pid
+  register: skip_red
+
+- name: skip redis
+  set_fact: skip_redis=true
+  when: (skip_red.stat is defined) and skip_red.stat.exists and fast_run
