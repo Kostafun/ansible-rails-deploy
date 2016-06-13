@@ -1,0 +1,33 @@
+---
+
+#username for deploy
+user: username
+
+#app_name must be unique on a server where app is deployed!
+app_name: myapp
+
+#app repo
+repo:
+branch: master
+
+#
+fast_run: false
+
+#for postgresql, anything - user with this pass will be created
+db_user: dbuser
+db_pass: "dbpass"
+
+#domains for nginx config only! if catch all domain - put _ (underscore)
+domains: 'domain.com www.domain.com'
+
+#
+do_webpack: true
+do_precompile_assets: false
+clone_submodules: false
+
+ruby: 'ruby-2.3.1'
+gemset_name: '{{ app_name }}'
+
+rvm_bin: '{{ rvm_install_path }}/bin/rvm'
+
+SECRET_KEY_BASE:
