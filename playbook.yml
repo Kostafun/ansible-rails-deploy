@@ -1,13 +1,26 @@
 ---
 - hosts: backends
   remote_user: root
-  vars:
-    - include_vars: config/vars.yml
+  vars_files:
+    - "config/vars.yml"
 
   pre_tasks:
     - name: Local - git add, commit, push
-      local_action: shell cd .. && git add ./* && git commit -m '{{ commit|default("none") }}' && git push origin {{ branch }}
+      local_action: shell cd .. && git add ./*
+      ignore_errors: yes
       tags: ['commit', 'deploy']
+
+    - local_action: shell cd .. && git commit --allow-empty -m '{{ commit|default("none") }}'
+      ignore_errors: yes
+      tags: ['commit', 'deploy']
+
+    - local_action: shell cd .. && git push origin {{ branch }}
+      ignore_errors: yes
+      tags: ['commit', 'deploy']
+
+
+
+
 
   roles:
     - { role: common, tags: ["setup"] }
@@ -16,5 +29,4 @@
 
     - { role: sbaerlocher.redis, when: not skip_redis, tags: ["redis", "setup"] }
 
-    - { role: rvm, tags: ["rvm", "setup"] }
     - { role: rails }

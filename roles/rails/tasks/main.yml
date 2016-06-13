@@ -1,11 +1,37 @@
 ---
 
+- include: 'fetch.yml'
+  tags: ["deploy", "checkout"]
+  become: yes
+  become_user: "{{ user }}"
+
+- name: Detect rvm binary
+  stat: path='{{ rvm_bin }}'
+  register: rvm_binary
+
+- include: 'rvm.yml'
+  when: not rvm_binary.stat.exists
+
+- name: Detect bundler
+  stat: path='{{ gem_bins_path }}/bundle'
+  register: bundler_binary
+
+- include: 'ruby.yml'
+  become: yes
+  become_user: '{{ user }}'
+  when: not bundler_binary.stat.exists
+
 - include: 'prepare.yml'
   tags: ["setup"]
+  when: not skip_rails_prepare
 
 - include: 'deploy.yml'
   tags: ["deploy", "checkout"]
+  become: yes
+  become_user: "{{ user }}"
 
 - include: 'webpack.yml'
   tags: ["deploy", "checkout", "webpack"]
   when: do_webpack
+  become: yes
+  become_user: '{{ user }}'

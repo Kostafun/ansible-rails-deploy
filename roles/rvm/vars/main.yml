@@ -1,6 +1,0 @@
----
-
-
-rvm_bin: '{{ rvm_install_path }}/bin/rvm'
-
-rvm_user: '{{ user }}'

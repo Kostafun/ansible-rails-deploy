@@ -14,15 +14,15 @@
   command: 'gpg --keyserver {{ rvm_gpg_key_server }} --recv-keys {{ rvm_gpg_keys }}'
   changed_when: False
   become: yes
-  become_user: '{{ rvm_user }}'
+  become_user: '{{ user }}'
 
 - name: RVM - Install rvm
   command: >
     /tmp/rvm-installer.sh stable --path {{ rvm_install_path }} {{ rvm_install_flags }}
   become: yes
-  become_user: '{{ rvm_user }}'
+  become_user: '{{ user }}'
 
 - name: RVM - Configure rvm autolibs
-  command: '{{ rvm_bin }} autolibs {{ rvm1_autolib_mode }}'
+  command: '{{ rvm_bin }} autolibs {{ rvm_autolib_mode }}'
   become: yes
-  become_user: '{{ rvm_user }}'
+  become_user: '{{ user }}'

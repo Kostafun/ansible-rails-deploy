@@ -1,0 +1,23 @@
+---
+
+
+- name: Detect  installed rubies and gemsets
+  command: '{{ rvm_bin }} list gemsets'
+  register: detect_gemsets
+  ignore_errors: true
+
+- name: Install rubies
+  command: '{{ rvm_bin }} install {{ ruby }} {{ ruby_install_flags }}'
+  when: "' {{ ruby }} ' not in detect_gemsets.stdout"
+
+- name: Create gemset
+  shell: '{{ rvm_bin }} {{ ruby }} do rvm gemset create {{ gemset_name }} '
+  when: "' {{ gemset }} ' not in detect_gemsets.stdout"
+
+- name: Create .ruby-version .ruby-gemset
+  shell: 'echo "{{ ruby }}" > {{ rails_release_path }}/.ruby-version && echo "{{ gemset_name }}" > {{ rails_release_path }}/.ruby-gemset'
+
+
+- name: Install bundler if not installed
+  command: "{{ gem_bins_path }}/gem install bundler"
+
