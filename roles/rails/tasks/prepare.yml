@@ -1,5 +1,7 @@
 ---
-
+- name: rails prepare - copy /etc/gemrs
+  copy: 'src=gemrc dest=/etc/gemrc owner=root group=root mode=0644'
+  when: not skip_rails_prepare
 
 - name: rails prepare - create app dirs
   file:
