@@ -9,7 +9,7 @@
   register: rvm_binary
 
 - include: 'rvm.yml'
-  when: not rvm_binary.stat.exists
+  #when: not rvm_binary.stat.exists
 
 - name: Detect bundler
   stat: path='{{ gem_bins_path }}/bundle'
@@ -18,7 +18,7 @@
 - include: 'ruby.yml'
   become: yes
   become_user: '{{ user }}'
-  when: not bundler_binary.stat.exists
+  #when: not bundler_binary.stat.exists
 
 - include: 'prepare.yml'
   tags: ["setup"]

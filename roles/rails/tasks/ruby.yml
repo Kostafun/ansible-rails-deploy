@@ -21,3 +21,7 @@
 - name: Install bundler if not installed
   command: "{{ gem_bins_path }}/gem install bundler"
 
+- name: Install unicorn with wrapper
+  command: "{{ rvm_bin }} {{ gemset }} do gem install unicorn creates={{ gem_bins_path }}/unicorn_rails"
+
+

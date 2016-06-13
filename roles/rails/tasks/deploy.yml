@@ -1,5 +1,6 @@
 ---
-
+#- name: rails deploy - copy .ruby-env
+#  template: src=".ruby-env.j2" dest="{{ rails_release_path }}/.ruby-env" owner={{ user }} group={{ user }}
 
 - name: rails deploy - remove destinations for links
   file: dest="{{ rails_release_path }}/{{ item }}" owner="{{ user }}" group="{{ user }}" state=absent
@@ -11,7 +12,7 @@
   with_items: ['log','pids','tmp','config/unicorn']
 
 - name: rails deploy - bundle install
-  bundler: chdir="{{ rails_release_path }}" state=present deployment_mode=false exclude_groups=development executable="{{ gem_bins_path }}/bundle"
+  bundler: chdir="{{ rails_release_path }}" state=present deployment_mode=false executable="{{ gem_bins_path }}/bundle"
 
 - name: write database.yml
   template: src=database.yml.j2 dest={{ rails_release_path }}/config/database.yml owner={{ user }} group={{ user }}
