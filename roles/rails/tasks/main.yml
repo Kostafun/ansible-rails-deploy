@@ -1,7 +1,6 @@
 ---
 
 - include: 'fetch.yml'
-  tags: ["deploy", "checkout"]
   become: yes
   become_user: "{{ user }}"
 
@@ -31,7 +30,5 @@
   become_user: "{{ user }}"
 
 - include: 'webpack.yml'
-  tags: ["deploy", "checkout", "webpack"]
+  tags: ["deploy", "checkout"]
   when: do_webpack
-  become: yes
-  become_user: '{{ user }}'

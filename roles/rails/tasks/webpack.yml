@@ -1,13 +1,17 @@
 ---
 
 - name: webpack - compile
-  local_action: shell cd .. && NODE_ENV=production webpack -p
+  local_action: shell bash --login -c 'cd .. && NODE_ENV=production webpack -p'
 
 - name: webpack - zip compiled js
-  local action: cd ../public/ && rm -f js.zip && zip js js/*
+  local_action: shell bash --login -c 'cd ../public/ && rm -f js.zip && zip js js/*'
 
 - name: webpack - upload zipped js
   copy: src="../public/js.zip" dest="{{ rails_release_path }}/public/js.zip"
+  become: yes
+  become_user: '{{ user }}'
 
 - name: webpack - unzip js
   shell: cd {{ rails_release_path }}/public/ && unzip js.zip
+  become: yes
+  become_user: '{{ user }}'

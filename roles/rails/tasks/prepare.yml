@@ -15,8 +15,6 @@
     - "{{ rails_path_app }}/shared/pids"
     - "{{ rails_path_app }}/shared/tmp"
     - "{{ rails_path_app }}/shared/config/unicorn"
-  become_user: "{{ user }}"
-  become: yes
 
 - name: rails prepare - create unicorn conf dir
   file:
@@ -26,8 +24,8 @@
 - name: rails prepare - create unicorn config
   template: src=unicorn-app.j2 dest=/etc/unicorn/{{ app_name }}.conf owner=root group=root mode=0644
 
-- name: Install unicorn init script
-  copy: src=etc/init.d/unicorn dest=/etc/init.d/unicorn owner=root group=root mode=0755
+- name: Install unicorn systemd service
+  template: src=unicorn.service.j2 dest=/etc/systemd/system/unicorn-{{ app_name }}.service owner=root group=root mode=0755
 
 - name: Create unicorn config directory
   file: dest=/etc/unicorn state=directory owner=root group=root mode=0755
@@ -38,7 +36,7 @@
   become: yes
 
 - name: rails prepare - create role
-  postgresql_user: login_user=postgres name={{ user }} password={{ db_pass }} role_attr_flags=CREATEDB,NOSUPERUSER
+  postgresql_user: login_user=postgres name={{ user }} password={{ db_pass }} role_attr_flags=CREATEDB,SUPERUSER
   become_user: postgres
   become: yes
 

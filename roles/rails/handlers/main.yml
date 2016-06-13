@@ -1,7 +1,7 @@
 ---
 # handlers file for helabs.rails-deploy
 - name: restart app
-  service: name=unicorn enabled=yes state=reloaded
+  service: name=unicorn-{{ app_name }} enabled=yes state=reloaded
   environment:
     RAILS_ENV: '{{ rails_env }}'
 #    GEM_HOME: "{{ gem_home }}"

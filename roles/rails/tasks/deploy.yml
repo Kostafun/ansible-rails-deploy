@@ -16,6 +16,10 @@
 - name: write database.yml
   template: src=database.yml.j2 dest={{ rails_release_path }}/config/database.yml owner={{ user }} group={{ user }}
 
+- name: write secrets.yml
+  template: src=secrets.yml.j2 dest={{ rails_release_path }}/config/secrets.yml owner={{ user }} group={{ user }}
+
+
 - name: rails deploy - Create db
   command: '{{ gem_bins_path }}/bundle exec rake db:create'
   environment:
