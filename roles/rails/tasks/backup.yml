@@ -8,7 +8,7 @@
   register: todays_backup
 
 - name: db backup - do backup
-  shell: pg_dump {{ db_name|app_name }} > gzip /tmp/{{ todays_backup }}
+  shell: pg_dump {{ db_name }} > gzip /tmp/{{ todays_backup }}
   when: not todays_backup.stat.exists
   become_user: postgres
   become: yes
