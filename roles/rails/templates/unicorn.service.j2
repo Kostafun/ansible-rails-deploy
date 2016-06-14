@@ -15,8 +15,8 @@ KillMode=mixed
 KillSignal=SIGQUIT
 
 #ExecReload=/bin/kill -s HUP $MAINPID
-#ExecReload=/bin/kill -s USR2 $MAINPID
-#ExecStop=/bin/kill -s QUIT $MAINPID
+ExecReload=/bin/kill -s USR2 $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
 
 [Install]
 WantedBy=multi-user.target

@@ -23,7 +23,7 @@ host  all  all  {{ host }}  password
 
 # Trusted hosts
 {% for host in pg_cfg_pg_hba_trust_hosts %}
-# {{ connection.comment }}
+
 host  all  all  {{ host }}  trust
 {% endfor %}
 
