@@ -13,14 +13,13 @@ branch: master
 #
 fast_run: false
 
-#for postgresql, anything - user with this pass will be created
+$for postgresql
 db_user: dbuser
 db_pass: "dbpass"
 
-#domains for nginx config only! if catch all domain - put _ (underscore)
-domains: 'domain.com www.domain.com'
+#domains for nginx config only! if catch all domain - put _
+domains: 'ovh3.craft.style'
 
-#
 do_webpack: true
 do_precompile_assets: false
 clone_submodules: false
@@ -30,4 +29,4 @@ gemset_name: '{{ app_name }}'
 
 rvm_bin: '{{ rvm_install_path }}/bin/rvm'
 
-SECRET_KEY_BASE:
+SECRET_KEY_BASE: c058e75fc5c129757c63fe62504b62c283342dd39f66776096995af1b3168cc45869c2a582cbf27e7b529b57d63923856dcd0822f5c57a0f97e316cd0295ea4d

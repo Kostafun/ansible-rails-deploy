@@ -1,0 +1,22 @@
+---
+- name: db backup - set backup name
+  set_fact:
+    backup_name: "db_backup_{{ app_name }}_{{ ansible_date_time.date | replace('-', '') }}.gz"
+
+- name: db backup - check if we have today's backup
+  local_action: stat follow=yes path=db_backup/{{ backup_name }}
+  register: todays_backup
+
+- name: db backup - do backup
+  shell: pg_dump {{ db_name|app_name }} > gzip /tmp/{{ todays_backup }}
+  when: not todays_backup.stat.exists
+  become_user: postgres
+  become: yes
+
+- name: db backup - fetch backup
+  fetch: src=/tmp/{{ todays_backup }} dest=db_backup/ flat=yes
+  when: not todays_backup.stat.exists
+
+- name: db backup - remove backups from host
+  shell: rm -f /tmp/{{ backup_name }}
+  when: not todays_backup.stat.exists

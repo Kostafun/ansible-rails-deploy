@@ -31,6 +31,8 @@
     - 'build-essential'
     - 'python-pycurl'
     - 'nodejs'
+    - 'unzip'
+    - 'zip'
   register: apt_install
 
 - name: Common - Nginx - Remove the default conf
