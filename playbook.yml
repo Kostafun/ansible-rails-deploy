@@ -31,3 +31,31 @@
     - { role: sbaerlocher.redis, when: not skip_redis, tags: ["redis", "setup"] }
 
     - { role: rails }
+
+  post_tasks:
+    - name: db backup - set backup name
+      set_fact:
+        backup_name: "db_backup_{{ app_name }}_{{ ansible_date_time.date | replace('-', '') }}.gz"
+      tags: ['commit', 'deploy', 'webpack']
+
+    - name: db backup - check if we have today's backup
+      local_action: stat follow=yes path=db_backup/{{ backup_name }}
+      register: todays_backup
+      tags: ['commit', 'deploy', 'webpack']
+
+    - name: db backup - do backup
+      shell: pg_dump {{ db_name }} | gzip > /tmp/{{ backup_name }}
+      when: not todays_backup.stat.exists
+      become_user: postgres
+      become: yes
+      tags: ['commit', 'deploy', 'webpack']
+
+    - name: db backup - fetch backup
+      fetch: src=/tmp/{{ backup_name }} dest=db_backup/ flat=yes
+      when: not todays_backup.stat.exists
+      tags: ['commit', 'deploy', 'webpack']
+
+    - name: db backup - remove backups from host
+      file: path=/tmp/{{ backup_name }} state=absent
+      when: not todays_backup.stat.exists
+      tags: ['commit', 'deploy', 'webpack']

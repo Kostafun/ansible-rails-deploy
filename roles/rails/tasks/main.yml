@@ -30,9 +30,7 @@
   become_user: "{{ user }}"
 
 - include: 'webpack.yml'
-  tags: ["deploy", "checkout"]
+  tags: ["deploy", "checkout", "webpack"]
   when: do_webpack
 
-- include: 'backup.yml'
-  tags: ["deploy", "checkout", "backup"]
-  when: do_backup
+

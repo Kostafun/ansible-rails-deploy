@@ -1,17 +1,23 @@
 ---
+- name: webpack - get local node version
+  local_action: command cat ../.node-version
+  register: node_ver
 
 - name: webpack - compile
-  local_action: shell bash --login -c 'cd .. && NODE_ENV=production webpack -p'
+  local_action: shell bash --login -c 'cd .. && NODE_ENV=production nvm exec {{ node_ver.stdout }} webpack -p'
 
 - name: webpack - zip compiled js
   local_action: shell bash --login -c 'cd ../public/ && rm -f js.zip && zip js js/*'
 
 - name: webpack - upload zipped js
-  copy: src="../public/js.zip" dest="{{ rails_release_path }}/public/js.zip"
+  copy: src="../public/js.zip" dest="{{ rails_current_path }}/public/js.zip"
   become: yes
   become_user: '{{ user }}'
 
+- name: webpack - remove js/
+  file: path='{{ rails_current_path }}/public/js' state=absent
+
 - name: webpack - unzip js
-  shell: cd {{ rails_release_path }}/public/ && unzip js.zip
+  shell: cd {{ rails_current_path }}/public/ && unzip js.zip
   become: yes
   become_user: '{{ user }}'
