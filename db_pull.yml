@@ -1,0 +1,29 @@
+---
+
+- hosts: backends
+  remote_user: root
+  vars_files:
+    - "config/vars.yml"
+
+  tasks:
+    - name: Dump remote DB
+      shell: pg_dump {{ db_name }} > /home/{{ user }}/{{ db_name }}.sql
+      become: yes
+      become_user: '{{ user }}'
+
+    - name: Fetch DB dump to localhost
+      fetch: flat=true src=/home/{{ user }}/{{ db_name }}.sql dest=/tmp
+
+    - file: path=/home/{{ user }}/{{ db_name }}.sql state=absent
+
+    - local_action: shell dropdb {{ db_name }}
+      ignore_errors: yes
+
+    - name: rails prepare - create role
+      local_action: postgresql_user name={{ user }} password={{ db_pass }} role_attr_flags=CREATEDB,SUPERUSER
+
+    - name: Create database on localhost
+      local_action: shell createdb -T template0 {{ db_name }}
+
+    - name: Restore DB dump on localhost
+      local_action: shell psql -1 -d {{ db_name }} < /tmp/{{ db_name }}.sql
