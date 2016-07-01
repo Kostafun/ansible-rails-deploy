@@ -33,6 +33,7 @@
     - 'nodejs'
     - 'unzip'
     - 'zip'
+    - 'ntpdate'
   register: apt_install
 
 - name: Common - Nginx - Remove the default conf

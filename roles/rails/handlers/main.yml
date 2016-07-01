@@ -8,7 +8,7 @@
 #  ignore_errors: yes
 
 - name: restart app
-  shell: RAILS_ENV={{ rails_env }} systemctl restart unicorn-{{ app_name }}.service
+  shell: RAILS_ENV={{ rails_env }} {{ env_vars }} systemctl restart unicorn-{{ app_name }}.service
   ignore_errors: yes
 
 - name: restart nginx

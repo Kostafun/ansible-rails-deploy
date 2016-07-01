@@ -44,7 +44,7 @@
       tags: ['commit', 'deploy', 'webpack']
 
     - name: db backup - do backup
-      shell: pg_dump {{ db_name }} | gzip > /tmp/{{ backup_name }}
+      shell: pg_dump -b {{ db_name }} | gzip > /tmp/{{ backup_name }}
       when: not todays_backup.stat.exists
       become_user: postgres
       become: yes

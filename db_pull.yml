@@ -7,7 +7,7 @@
 
   tasks:
     - name: Dump remote DB
-      shell: pg_dump {{ db_name }} > /home/{{ user }}/{{ db_name }}.sql
+      shell: pg_dump -b {{ db_name }} > /home/{{ user }}/{{ db_name }}.sql
       become: yes
       become_user: '{{ user }}'
 

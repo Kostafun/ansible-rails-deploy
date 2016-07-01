@@ -29,12 +29,11 @@
     chdir: '{{ rails_release_path }}'
 
 - name: rails deploy - db migrate
-  command: '{{ gem_bins_path }}/bundle exec rake db:migrate'
+  shell: /bin/bash --login -c 'cd {{ rails_release_path }} && {{ rvm_bin }} {{ gemset }} do rake db:migrate'
   environment:
     RAILS_ENV: '{{ rails_env }}'
-  args:
-    chdir: '{{ rails_release_path }}'
   ignore_errors: yes
+  #tags: ['db_migrate']
 
 - name: rails deploy - Precompile assets
   command: '{{ gem_bins_path }}/bundle exec rake assets:precompile'

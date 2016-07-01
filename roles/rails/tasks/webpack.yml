@@ -5,6 +5,11 @@
 
 - name: webpack - compile
   local_action: shell bash --login -c 'cd .. && NODE_ENV=production nvm exec {{ node_ver.stdout }} webpack -p'
+  when: webpack_production
+
+- name: webpack - compile
+  local_action: shell bash --login -c 'cd .. && NODE_ENV=development nvm exec {{ node_ver.stdout }} webpack'
+  when: not webpack_production
 
 - name: webpack - zip compiled js
   local_action: shell bash --login -c 'cd ../public/ && rm -f js.zip && zip js js/*'
