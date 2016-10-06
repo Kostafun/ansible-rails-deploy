@@ -10,6 +10,8 @@ server {
   access_log {{ rails_current_path }}/log/nginx-access.log;
   error_log {{ rails_current_path }}/log/nginx-error.log;
 
+  gzip on;
+
   location ^~ /assets/ {
     gzip_static on;
     expires max;
