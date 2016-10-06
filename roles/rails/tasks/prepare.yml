@@ -44,7 +44,7 @@
   become: yes
 
 - name: Nginx | Configure apps
-  template: src=nginx-app.conf.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf group=www-data owner=www-data force=yes
+  template: src={{ nginx_conf_tpl }} dest=/etc/nginx/sites-available/{{ app_name }}.conf group=www-data owner=www-data force=yes
 
 - name: Nginx | Enable apps
   file: path=/etc/nginx/sites-enabled/{{ app_name }}.conf src=/etc/nginx/sites-available/{{ app_name }}.conf state=link
