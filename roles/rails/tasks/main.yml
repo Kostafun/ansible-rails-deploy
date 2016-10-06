@@ -1,12 +1,5 @@
 ---
 
-- include: 'fetch.yml'
-  become: yes
-  become_user: "{{ user }}"
-
-- include: 'incremental_fetch.yml'
-  tags: ["deploy", "checkout"]
-  when: not git_full_download
 
 - name: Detect rvm binary
   stat: path='{{ rvm_bin }}'
@@ -33,12 +26,6 @@
   become: yes
   become_user: "{{ user }}"
 
-- include: 'upload_public.yml'
-  tags: ["deploy", "checkout", "webpack"]
-  when: upload_public
 
-- include: 'webpack.yml'
-  tags: ["deploy", "checkout", "webpack"]
-  when: do_webpack
 
 

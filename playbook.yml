@@ -30,7 +30,10 @@
 
     - { role: sbaerlocher.redis, when: not skip_redis, tags: ["redis", "setup"] }
 
+    - { role: upload }
+
     - { role: rails }
+
 
   post_tasks:
     - name: db backup - set backup name

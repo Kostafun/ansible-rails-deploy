@@ -1,4 +1,5 @@
 ---
+
 - name: rails prepare - copy /etc/gemrs
   copy: 'src=gemrc dest=/etc/gemrc owner=root group=root mode=0644'
   when: not skip_rails_prepare
@@ -13,7 +14,7 @@
     state: directory
   with_items:
     - "{{ rails_path_app }}/releases"
-    - "{{ rails_path_app }}/shared/log"
+    - "{{ rails_path_app }}/shared/"
     - "{{ rails_path_app }}/shared/pids"
     - "{{ rails_path_app }}/shared/tmp"
     - "{{ rails_path_app }}/shared/config/unicorn"

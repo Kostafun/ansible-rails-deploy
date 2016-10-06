@@ -1,0 +1,7 @@
+---
+
+- name: git clone - fetching app sources
+  git: repo="{{ repo }}" dest="{{ rails_release_path }}" clone=yes depth=1 recursive={{ clone_submodules }} accept_hostkey=True version="{{ branch }}"
+  tags: ["deploy", "checkout"]
+  become: yes
+  become_user: "{{ user }}"
