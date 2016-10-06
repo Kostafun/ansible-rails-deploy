@@ -7,18 +7,28 @@
 
   tasks:
     - name: Dump local DB
-      local_action: shell pg_dump {{ local_db_name }} > ../tmp/{{ db_name }}.sql
-      become: yes
-      become_user: '{{ user }}'
+      local_action: shell pg_dump {{ db_name }} > ../tmp/{{ db_name }}.sql
 
-    - name: upload db
-      fetch: flat=true src=/home/{{ user }}/{{ db_name }}.sql dest=/tmp
+
+    - name: upload db to serv
       copy: src="../tmp/{{ db_name }}.sql" dest="/home/{{ user }}/{{ db_name }}.sql"
       become: yes
       become_user: '{{ user }}'
 
+    - name: kill processes connected to db!
+      shell: echo "DROP DATABASE {{ db_name }};"
+      become: yes
+      become_user: '{{ user }}'
+
+    - name: restart postgresql
+      service:
+        name: postgresql
+        state: restarted
+      sudo: true
 
     - shell: dropdb {{ db_name }}
+      become: yes
+      become_user: '{{ user }}'
       ignore_errors: yes
 
     - name: rails prepare - create role
@@ -26,6 +36,10 @@
 
     - name: Create database on localhost
       shell: createdb -T template0 {{ db_name }}
+      become: yes
+      become_user: '{{ user }}'
 
-    - name: Restore DB dump on localhost
-      local_action: shell psql -1 -d {{ db_name }} < /tmp/{{ db_name }}.sql
+    - name: Restore DB dump on remote server
+      shell: psql -d {{ db_name }} < /home/{{ user }}/{{ db_name }}.sql
+      become: yes
+      become_user: '{{ user }}'

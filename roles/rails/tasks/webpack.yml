@@ -4,11 +4,11 @@
   register: node_ver
 
 - name: webpack - compile
-  local_action: shell bash --login -c 'cd .. && NODE_ENV=production nvm exec {{ node_ver.stdout }} webpack -p'
+  local_action: shell bash --login -c 'cd .. && NODE_ENV=production nvm exec {{ node_ver.stdout }} webpack -p --config webpack.config.babel.js'
   when: webpack_production
 
 - name: webpack - compile
-  local_action: shell bash --login -c 'cd .. && NODE_ENV=development nvm exec {{ node_ver.stdout }} webpack'
+  local_action: shell bash --login -c 'cd .. && NODE_ENV=development nvm exec {{ node_ver.stdout }} webpack --config webpack.config.babel.js'
   when: not webpack_production
 
 - name: webpack - zip compiled js

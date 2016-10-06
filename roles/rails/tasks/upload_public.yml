@@ -1,0 +1,4 @@
+- name: rsync public
+  synchronize: src="../public" dest="{{ rails_current_path }}/public/" delete=yes recursive=yes
+  become: yes
+  become_user: '{{ user }}'
