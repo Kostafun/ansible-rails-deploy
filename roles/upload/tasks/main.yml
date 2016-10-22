@@ -11,6 +11,7 @@
   tags: ["deploy", "checkout", "webpack"]
 
 - include: 'rsync_upload.yml'
+  when: rsync_upload
 
 - include: 'webpack.yml'
   tags: ["deploy", "checkout", "webpack"]
