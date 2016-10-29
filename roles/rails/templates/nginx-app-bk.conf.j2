@@ -1,0 +1,55 @@
+upstream {{ app_name }} {
+  server unix:/tmp/unicorn.{{ app_name }}.sock fail_timeout=0;
+}
+
+proxy_cache_path /media/ram/cache levels=1:2 keys_zone=my-cache:8m max_size=1000m inactive=10d;
+proxy_temp_path /media/ram/tmp;
+
+server {
+  server_name {{ domains }};
+  listen 80;
+  listen 443 default_server ssl;
+
+  access_log {{ rails_current_path }}/log/nginx-access.log;
+  error_log {{ rails_current_path }}/log/nginx-error.log;
+
+  gzip on;
+
+  location / {
+      gzip_static on;
+      expires max;
+      add_header Cache-Control public;
+      root {{ rails_current_path }}/public;
+      try_files $uri $uri/index.html @{{ app_name }};
+  }
+
+  location ~ /.well-known {
+                root {{ rails_current_path }};
+                allow all;
+        }
+
+location ~ ^/(assets|media)/ {
+    proxy_cache my-cache;
+    proxy_cache_valid      200  30d;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_pass http://{{ app_name }};
+}
+
+  location @{{ app_name }} {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_pass http://{{ app_name }};
+  }
+
+  error_page 500 502 503 504 /500.html;
+  client_max_body_size 4G;
+  keepalive_timeout 10;
+
+      ssl_certificate /etc/letsencrypt/live/bookary.com/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/bookary.com/privkey.pem;
+
+
+}

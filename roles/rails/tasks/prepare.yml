@@ -33,6 +33,10 @@
 - name: Create unicorn config directory
   file: dest=/etc/unicorn state=directory owner=root group=root mode=0755
 
+- name: enable unicorn service
+  systemd: name=unicorn-{{ app_name }} enabled=yes
+
+
 - name: rails prepare - create unicorn.rb
   template: src=unicorn_rb.j2 dest={{ rails_path_app }}/shared/config/unicorn/unicorn.rb owner={{ user }} group={{ user }}
   become_user: "{{ user }}"
