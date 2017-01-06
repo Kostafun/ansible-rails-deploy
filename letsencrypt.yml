@@ -3,9 +3,8 @@
   user: root
   roles:
     - role: thefinn93.letsencrypt
-      letsencrypt_email: 'admin@bookingcashier.com'
+      letsencrypt_email: 'admin@fluorine.tech'
       letsencrypt_cert_domains:
-        - bookary.com
-        - bookingcashier.com
+        - fluorine.tech
       letsencrypt_renewal_command_args: '--renew-hook "systemctl restart nginx"'
-      letsencrypt_webroot_path: '/home/bk/bookingcashier/current'
+      letsencrypt_webroot_path: '/home/fluorine/fluorine1_ru/current'
