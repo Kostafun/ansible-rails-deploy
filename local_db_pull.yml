@@ -1,0 +1,25 @@
+- hosts: locals
+  remote_user: '{{ user }}'
+  vars_files:
+    - "config/localhost_vars.yml"
+
+  tasks:
+    - name: restart postgresql
+      service:
+        name: postgresql
+        state: restarted
+      become_user: root
+      become: true
+
+    - shell: rake db:drop
+
+    - shell: rake db:create
+
+    - shell: rake db:migrate
+      ignore_errors: true
+
+    - shell: rake db:migrate
+
+    - shell: psql -1 -d {{ db_name }} < /tmp/{{ db_name }}.sql
+      become: true
+      become_user: postgres

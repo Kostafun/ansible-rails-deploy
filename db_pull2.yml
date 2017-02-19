@@ -1,0 +1,17 @@
+---
+
+- hosts: backends
+  remote_user: root
+  vars_files:
+    - "config/vars.yml"
+
+  tasks:
+    - name: Dump remote DB
+      shell: pg_dump -b {{ db_name }} > /home/{{ user }}/{{ db_name }}.sql
+      become: yes
+      become_user: '{{ user }}'
+
+    - name: Fetch DB dump to localhost
+      fetch: flat=true src=/home/{{ user }}/{{ db_name }}.sql dest=/tmp
+
+    - file: path=/home/{{ user }}/{{ db_name }}.sql state=absent
