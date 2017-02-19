@@ -1,0 +1,4 @@
+---
+
+- name: patch openbabel for element colors
+  copy: src="../config/patches/element.txt" dest="/usr/share/openbabel/2.3.2/element.txt"

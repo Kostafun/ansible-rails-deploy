@@ -11,15 +11,22 @@
       become_user: root
       become: true
 
-    - shell: rake db:drop
+    - name: db drop
+      shell: rake db:drop
 
-    - shell: rake db:create
+    - shell: rake db:setup
+
+    - name: db:create
+      shell: rake db:create
+
+
+
+    - name: import database
+      shell: psql -d --single-transaction -v ON_ERROR_STOP=1 {{ db_name }} -f /tmp/{{ db_name }}.sql
+      become: true
+      become_user: postgres
 
     - shell: rake db:migrate
       ignore_errors: true
 
     - shell: rake db:migrate
-
-    - shell: psql -1 -d {{ db_name }} < /tmp/{{ db_name }}.sql
-      become: true
-      become_user: postgres

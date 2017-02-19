@@ -8,6 +8,7 @@
   apt: pkg={{ item }}
   # with_items - это обычный цикл в Ansible, он возьмёт и прогонит все его элементы через action
   with_items:
+    - 'sudo'
     - 'libssl-dev'
     - 'libyaml-dev'
     - 'libreadline6-dev'
@@ -36,8 +37,13 @@
     - 'ntpdate'
     - 'openbabel'
     - 'default-jre'
+    - 'xvfb'
+    - 'wkhtmltopdf'
 
   register: apt_install
+
+- name: wkdhtmltopdf headless wrapper
+  copy: 'src=html2pdf_headless dest=/usr/bin/html2pdf_headless owner=root group=root mode=0755'
 
 - name: Common - Nginx - Remove the default conf
   file: path=/etc/nginx/sites-enabled/default state=absent

@@ -22,8 +22,6 @@
     - name: rails prepare - create role
       local_action: postgresql_user name={{ user }} password={{ db_pass }} role_attr_flags=CREATEDB,SUPERUSER
 
-    - local_action: shell sudo systemctl restart postgresql
-
     - name: Drop database on localhost
       local_action: shell dropdb {{ db_name }}
       ignore_errors: yes
