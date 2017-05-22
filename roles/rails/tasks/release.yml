@@ -1,0 +1,32 @@
+---
+
+- name: rails deploy - get releases
+  shell: ls -1t {{ rails_path_app }}/releases/ | tail -n +{{ config_keep_releases + 1 }}
+  register: rails_releases_dirs
+
+- name: rails deploy - remove old releases
+  file:
+    dest: "{{ rails_path_app }}/releases/{{ item }}"
+    state: absent
+  with_items: "{{ rails_releases_dirs.stdout_lines }}"
+  when: "{{ item | match('\\d{14}') }}"
+
+- name: rails deploy - activate the new release
+  file:
+    src: "{{ rails_release_path }}"
+    dest: "{{ rails_current_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    state: link
+  notify:
+    - restart app
+    - restart nginx
+
+- name: Wait for precompile assets
+  async_status: jid={{ assets_precompile_wait.ansible_job_id }}
+  become: yes
+  become_user: '{{ user }}'
+  register: job_result_precomp
+  until: job_result_precomp.finished is defined and job_result_precomp.finished
+  retries: 30
+  when: config_precompile_assets

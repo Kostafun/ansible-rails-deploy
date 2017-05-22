@@ -1,0 +1,15 @@
+---
+
+- hosts: postgres
+  remote_user: root
+  vars_files:
+    - "config/vars.yml"
+  roles:
+    - common
+    - postgresql
+
+  post_tasks:
+    - name: rails prepare - create role
+      postgresql_user: login_user=postgres name={{ user }} password={{ db_pass }} role_attr_flags=CREATEDB,SUPERUSER
+      become_user: postgres
+      become: yes

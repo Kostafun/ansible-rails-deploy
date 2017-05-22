@@ -1,0 +1,9 @@
+---
+
+- hosts: pgen
+  remote_user: root
+  vars_files:
+    - "config/pgen.yml"
+  roles:
+    - common
+    - rails

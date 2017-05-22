@@ -1,0 +1,9 @@
+---
+
+- hosts: redis
+  remote_user: root
+  vars_files:
+    - "config/vars.yml"
+  roles:
+    - common
+    - sbaerlocher.redis

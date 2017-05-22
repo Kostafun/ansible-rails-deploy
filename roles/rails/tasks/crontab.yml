@@ -1,0 +1,5 @@
+---
+
+- name: Install crontab
+  shell: /bin/bash --login -c 'cd {{ rails_release_path }} && {{ rvm_bin }} {{ gemset }} do whenever --update-crontab'
+  when: config_first_run

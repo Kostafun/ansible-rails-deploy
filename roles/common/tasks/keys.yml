@@ -1,0 +1,19 @@
+- name: Create .ssh dir
+  file: path={{ home }}/.ssh state=directory
+  become: yes
+  become_user: '{{ user }}'
+
+- name: Copy authorized_keys to user
+  copy: 'src=../../../config/authorized_keys dest={{ home }}/.ssh/authorized_keys mode=0600'
+  become: yes
+  become_user: '{{ user }}'
+
+#- name: Copy ssh private key (for git repos)
+#  copy: 'src=../../../config/id_rsa dest={{ home }}/.ssh/id_rsa mode=0600'
+#  become: yes
+#  become_user: '{{ user }}'
+#
+#- name: Copy ssh public key (for git repos)
+#  copy: 'src=../../../config/id_rsa.pub dest={{ home }}/.ssh/id_rsa.pub mode=0644'
+#  become: yes
+#  become_user: '{{ user }}'

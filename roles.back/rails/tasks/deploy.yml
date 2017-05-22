@@ -1,0 +1,69 @@
+---
+#- name: rails deploy - copy .ruby-env
+#  template: src=".ruby-env.j2" dest="{{ rails_release_path }}/.ruby-env" owner={{ user }} group={{ user }}
+
+
+- name: rails deploy - bundle install
+  bundler: chdir="{{ rails_release_path }}" state=present deployment_mode=false executable="{{ gem_bins_path }}/bundle"
+
+- name: write database.yml
+  template: src=database.yml.j2 dest={{ rails_release_path }}/config/database.yml owner={{ user }} group={{ user }}
+
+- name: write secrets.yml
+  template: src=secrets.yml.j2 dest={{ rails_release_path }}/config/secrets.yml owner={{ user }} group={{ user }}
+
+
+- name: rails deploy - Create db
+  command: '{{ gem_bins_path }}/bundle exec rake db:create'
+  environment:
+    RAILS_ENV: '{{ rails_env }}'
+  args:
+    chdir: '{{ rails_release_path }}'
+
+- name: rails deploy - db migrate
+  shell: /bin/bash --login -c 'cd {{ rails_release_path }} && {{ rvm_bin }} {{ gemset }} do rake db:migrate'
+  environment:
+    RAILS_ENV: '{{ rails_env }}'
+  ignore_errors: yes
+  #tags: ['db_migrate']
+
+- name: rails deploy - Precompile assets
+  command: '{{ gem_bins_path }}/bundle exec rake assets:precompile'
+  environment:
+    RAILS_ENV: '{{ rails_env }}'
+#    GEM_HOME: "{{ gem_home }}"
+  args:
+    chdir: '{{ rails_release_path }}'
+  when: do_precompile_assets
+
+- name: rails deploy - get releases
+  shell: ls -1t {{ rails_path_app }}/releases/ | tail -n +{{ rails_keep_releases + 1 }}
+  register: rails_releases_dirs
+
+- name: rails deploy - remove old releases
+  file:
+    dest: "{{ rails_path_app }}/releases/{{ item }}"
+    state: absent
+  with_items: "{{ rails_releases_dirs.stdout_lines }}"
+  when: "{{ item | match('\\d{14}') }}"
+
+- name: rails deploy - activate the new release
+  file:
+    src: "{{ rails_release_path }}"
+    dest: "{{ rails_current_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    state: link
+  notify:
+    - restart app
+    - restart nginx
+
+
+- debug: msg="prepare runned"
+  when: not skip_rails_prepare
+
+- debug: msg="postgres runned"
+  when: not skip_pg
+
+- debug: msg="redis runned"
+  when: not skip_redis

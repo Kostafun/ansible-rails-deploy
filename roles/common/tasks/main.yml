@@ -1,12 +1,8 @@
-- include: 'rails_init.yml'
-  tags: ['always']
-
 - name: 'apt | update'
   apt: update_cache=yes
 
 - name: 'apt | install dependencies'
   apt: pkg={{ item }}
-  # with_items - это обычный цикл в Ansible, он возьмёт и прогонит все его элементы через action
   with_items:
     - 'sudo'
     - 'libssl-dev'
@@ -35,35 +31,19 @@
     - 'unzip'
     - 'zip'
     - 'ntpdate'
-    - 'openbabel'
     - 'default-jre'
-    - 'xvfb'
-    - 'wkhtmltopdf'
+    - 'mongodb'
 
   register: apt_install
-
-- name: wkdhtmltopdf headless wrapper
-  copy: 'src=html2pdf_headless dest=/usr/bin/html2pdf_headless owner=root group=root mode=0755'
 
 - name: Common - Nginx - Remove the default conf
   file: path=/etc/nginx/sites-enabled/default state=absent
   ignore_errors: yes
   when: apt_install|changed
 
-
-# Создаём нашего пользователя deploy, копируем авторизационный ключ,
-# а так же публичный и приватный ssh ключи
 - name: 'account | create'
   user: 'name={{ user }} shell=/bin/bash'
   register: user_create
 
-- name: 'account | copy authorized keys'
-  # shell - это модуль Ansible, который позволяет выполнять обычные bash команды
-  shell: 'mkdir -p {{ home }}/.ssh -m 700 && cp /root/.ssh/authorized_keys {{ home }}/.ssh && chown -R {{ user }}:{{ user }} {{ home }}/.ssh'
-  when: user_create|changed
-
-#- name: 'skipping - postgres'
-#  command: dpkg --get-selections | grep postgres
-
-- include: 'skippers.yml'
-  tags: ['always']
+- include: 'keys.yml'
+#  when: user_create|changed

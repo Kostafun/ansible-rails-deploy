@@ -21,6 +21,7 @@ server {
       add_header Cache-Control public;
       root {{ rails_current_path }}/public;
       try_files $uri $uri/index.html @{{ app_name }};
+      add_header 'Access-Control-Allow-Origin' "$http_origin";
   }
 
   location ~ /.well-known {

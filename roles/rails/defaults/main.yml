@@ -1,19 +1,18 @@
 ---
 
-#repo: 'git@bitbucket.org:kostafun/bookarails2.git'
-#branch: 'refactoring'
-rails_keep_releases: 3
+config_keep_releases: 3
 rails_env: production
 unicorn_workers: 5
 
 
 ruby: 'ruby-2.3.1'
-
+gemset_name: '{{ app_name }}'
 #better not change next line
 gemset: '{{ ruby }}@{{ gemset_name }}'
 
 # Install path for rvm
 rvm_install_path: '{{ home }}/.rvm'
+rvm_bin: '{{ rvm_install_path }}/bin/rvm'
 
 # Add or remove any install flags
 # NOTE: If you are doing a USER BASED INSTALL then
@@ -21,7 +20,6 @@ rvm_install_path: '{{ home }}/.rvm'
 rvm_install_flags: '--auto-dotfiles --user-install'
 
 ruby_install_flags:
-
 
 # URL for the latest installer script
 rvm_latest_installer: 'https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer'

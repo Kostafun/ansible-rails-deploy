@@ -1,0 +1,29 @@
+---
+
+- name: rails deploy - get release date
+  set_fact:
+    rails_release: "{{ ansible_date_time.date | replace('-', '') }}{{ ansible_date_time.time | replace(':', '') }}"
+    rails_path_app: "{{ home }}/{{ app_name }}"
+
+- name: rails deploy - get release path
+  set_fact:
+    rails_release_path: "{{ rails_path_app }}/releases/{{ rails_release }}"
+    rails_current_path: "{{ rails_path_app }}/current"
+#    gem_home: "{{ rails_path_app }}/gems"
+    gem_bins_path: "{{ rvm_install_path }}/gems/{{ gemset }}/wrappers/"
+
+- name: Create app dirs
+  file:
+    dest: "{{ item }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: 0755
+    recurse: yes
+    state: directory
+  with_items:
+    - "{{ rails_path_app }}/releases"
+    - "{{ rails_path_app }}/shared/"
+    - "{{ rails_path_app }}/shared/pids"
+    - "{{ rails_path_app }}/shared/tmp"
+    - "{{ rails_path_app }}/shared/config/unicorn"
+  register: app_dirs_created

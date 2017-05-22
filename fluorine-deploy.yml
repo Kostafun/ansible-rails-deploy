@@ -1,0 +1,9 @@
+---
+
+- hosts: fluorinerails
+  remote_user: root
+  vars_files:
+    - "config/fluorine.yml"
+  roles:
+    - common
+    - rails

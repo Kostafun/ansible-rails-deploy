@@ -1,0 +1,16 @@
+---
+
+- name: Wait for webpack to complete build
+  async_status: jid={{ webpack_build_wait.ansible_job_id }}
+  delegate_to: 127.0.0.1
+  register: job_result
+  until: job_result.finished is defined and job_result.finished
+  retries: 30
+
+- name: Rsync upload webpack build
+  synchronize: src={{ config_local_path }}{{ config_webpack_build_dir }} dest={{ rails_release_path }}/{{ config_webpack_build_dir }} owner=no group=no
+  become: yes
+  become_user: "{{ user }}"
+
+- name: Chown wp build dir to our user
+  shell: chown -R {{ user }}:{{ user }} {{ rails_release_path }}/{{ config_webpack_build_dir }}

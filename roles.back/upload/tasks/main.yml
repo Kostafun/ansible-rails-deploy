@@ -1,0 +1,18 @@
+---
+
+- include: 'git_keys.yml'
+  become: yes
+  become_user: "{{ user }}"
+  when: not skip_rails_prepare
+
+- include: 'git_clone.yml'
+
+- include: 'link_dirs.yml'
+  tags: ["deploy", "checkout", "webpack"]
+
+- include: 'rsync_upload.yml'
+  when: rsync_upload
+
+- include: 'webpack.yml'
+  tags: ["deploy", "checkout", "webpack"]
+  when: do_webpack

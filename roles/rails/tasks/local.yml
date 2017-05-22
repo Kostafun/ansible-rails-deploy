@@ -1,0 +1,11 @@
+- name: Get local node version
+  local_action: command cat {{ config_local_path }}/.node-version
+  register: node_ver
+
+- name: Webpack build (npm run build)
+  shell: bash --login -c 'cd {{ config_local_path }} && nvm exec {{ node_ver.stdout }} npm run build'
+  #shell: cd {{ config_local_path }} && ~/.nvm/nvm-exec {{ node_ver.stdout }} npm run build
+  delegate_to: 127.0.0.1
+  async: 600
+  poll: 0
+  register: webpack_build_wait

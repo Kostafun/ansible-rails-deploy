@@ -1,21 +1,15 @@
 ---
-#moved to common
-#- name: Ensure common packages are installed
-#  apt: pkg={{ item }} state=installed update_cache=yes cache_valid_time=3600
-#  with_items:
-#    - python-pycurl
-#  sudo: true
-#  tags: postgres_common
 
-- name: Include Debian tasks
-  include: debian.yml
-  when: ansible_os_family == "Debian"
-  tags: postgres_debian
-
-- name: Ensure apt cache is up to date
-  apt: update_cache=yes cache_valid_time=3600
+- name: debian | add pg keys
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc id=ACCC4CF8 state=present
   sudo: true
-  tags: postgres_debian
+  when: pg_repo == 'postgresql.org'
+
+- name: debian | add postgres repositories
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_lsb.codename }}-pgdg main' state=present update_cache=yes
+  sudo: true
+  when: pg_repo == 'postgresql.org'
+  register: pg_repo_added
 
 - name: Ensure packages are installed
   apt: pkg={{ item }}
@@ -23,27 +17,29 @@
     - postgresql-{{ pg_version }}
     - postgresql-client-{{ pg_version }}
     - python-psycopg2
+    - libpq-dev
+    - postgresql-contrib-{{ pg_version }}
+    - postgresql-{{ pg_version }}-postgis-{{ pg_postgis_version }}
+    - libgeos-c1
   register: db_setup
   environment: '{{ pg_proxy_env }}'
   sudo: true
   tags: postgres_packages
-
-- name: Recreate cluster
-  include: recreate_cluster.yml
-  when: pg_cluster_recreate
-  tags: postgres_cluster
+  when: pg_repo_added|changed
 
 - name: Update pg_hba.conf file
   template: src=pg_hba.conf.j2 dest=/etc/postgresql/{{ pg_version }}/{{ pg_cluster }}/pg_hba.conf owner={{ pg_admin_user }} group={{ pg_admin_user }} mode=0640
   notify: restart postgresql
   sudo: true
   tags: postgres_config
+  when: db_setup|changed
 
 - name: Update postgres.conf file
   template: src=master.conf.j2 dest=/etc/postgresql/{{ pg_version }}/{{ pg_cluster }}/postgresql.conf owner={{ pg_admin_user }} group={{ pg_admin_user }} mode=0644
   sudo: true
   notify: restart postgresql
   tags: postgres_config
+  when: db_setup|changed
 
 - name: Ensure ssl cert permissions
   file:
@@ -65,9 +61,6 @@
   when: pg_cfg_srv_ssl_key_file is defined
   tags: postgres_config
 
-- include: extensions_common.yml
-  tags: postgres_extensions
-
 - meta: flush_handlers
 
 - name: ensure postgresql server is started
@@ -79,7 +72,3 @@
     pattern: "/usr/lib/postgresql/{{ pg_version | float }}/bin/postgres -D /var/lib/postgresql/{{ pg_version }}/{{ pg_cluster }}"
   sudo: true
   tags: postgres_start
-
-- include: postgis.yml
-  when: pg_postgis
-  tags: postgres_postgis

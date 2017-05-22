@@ -1,0 +1,41 @@
+---
+
+- name: Rsync upload to server
+  synchronize: src={{ config_local_path }} dest={{ rails_release_path }} rsync_opts=--exclude-from='{{ config_local_path }}.gitignore' owner=no group=no
+  become: yes
+  become_user: "{{ user }}"
+
+- name: Chown to our user - workaround to rsync
+  shell: chown -R {{ user }}:{{ user }} {{ rails_release_path }}
+
+- name: Create static dirs in shared folder
+  file:
+    dest: "{{ rails_path_app }}/shared/{{ item }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: 0755
+    recurse: yes
+    state: directory
+  with_items: "{{ config_shared_dirs }}"
+
+- name: Upload shared dirs
+  synchronize: src="{{ config_local_path }}/{{ item }}/" dest="{{ rails_path_app }}/shared/{{ item }}/" owner=no group=no
+  become: yes
+  become_user: '{{ user }}'
+  with_items: "{{ config_upload_shared }}"
+  when: config_do_upload
+
+- name: Chown shared dirs to our user
+  shell: chown -R {{ user }}:{{ user }} {{ rails_path_app }}/shared/{{ item }}
+  with_items: "{{ config_upload_shared }}"
+
+- name: Create webpack build dir
+  file:
+    dest: "{{ rails_path_app }}/shared/{{ config_webpack_build_dir }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: 0755
+    recurse: yes
+    state: directory
+
+

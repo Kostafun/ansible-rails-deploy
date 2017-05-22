@@ -1,0 +1,9 @@
+---
+
+- hosts: rails
+  remote_user: root
+  vars_files:
+    - "config/vars.yml"
+  roles:
+    - common
+    - rails

@@ -1,0 +1,49 @@
+---
+
+- name: Write database.yml
+  template: src=database.yml.j2 dest={{ rails_release_path }}/config/database.yml owner={{ user }} group={{ user }}
+
+- name: Write secrets.yml
+  template: src=secrets.yml.j2 dest={{ rails_release_path }}/config/secrets.yml owner={{ user }} group={{ user }}
+
+- name: Create db with rake
+  command: '{{ gem_bins_path }}/bundle exec rake db:create'
+  environment:
+    RAILS_ENV: '{{ rails_env }}'
+  args:
+    chdir: '{{ rails_release_path }}'
+  become: yes
+  become_user: '{{ user }}'
+
+- name: Setup db with rake
+  command: '{{ gem_bins_path }}/bundle exec rake db:schema:load'
+  environment:
+    RAILS_ENV: '{{ rails_env }}'
+  args:
+    chdir: '{{ rails_release_path }}'
+  become: yes
+  become_user: '{{ user }}'
+  when: config_first_run
+
+
+- name: Rake db migrate
+  command: '{{ gem_bins_path }}/bundle exec rake db:migrate'
+  environment:
+    RAILS_ENV: '{{ rails_env }}'
+  args:
+    chdir: '{{ rails_release_path }}'
+  become: yes
+  become_user: '{{ user }}'
+
+- name: Precompile assets
+  command: '{{ gem_bins_path }}/bundle exec rake assets:precompile'
+  environment:
+    RAILS_ENV: '{{ rails_env }}'
+  args:
+    chdir: '{{ rails_release_path }}'
+  become: yes
+  become_user: '{{ user }}'
+  async: 600
+  poll: 0
+  register: assets_precompile_wait
+  when: config_precompile_assets

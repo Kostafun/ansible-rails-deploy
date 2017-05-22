@@ -1,27 +1,49 @@
 ---
 
-
 - name: Detect  installed rubies and gemsets
   command: '{{ rvm_bin }} list gemsets'
   register: detect_gemsets
   ignore_errors: true
+  become: yes
+  become_user: '{{ user }}'
+
 
 - name: Install rubies
   command: '{{ rvm_bin }} install {{ ruby }} {{ ruby_install_flags }}'
   when: "' {{ ruby }} ' not in detect_gemsets.stdout"
+  register: ruby_installed
+  become: yes
+  become_user: '{{ user }}'
 
 - name: Create gemset
   shell: '{{ rvm_bin }} {{ ruby }} do rvm gemset create {{ gemset_name }} '
   when: "' {{ gemset }} ' not in detect_gemsets.stdout"
+  register: gemset_created
+  become: yes
+  become_user: '{{ user }}'
 
-- name: Create .ruby-version .ruby-gemset
-  shell: 'echo "{{ ruby }}" > {{ rails_release_path }}/.ruby-version && echo "{{ gemset_name }}" > {{ rails_release_path }}/.ruby-gemset'
+#- name: Create .ruby-version .ruby-gemset
+#  shell: 'echo "{{ ruby }}" > {{ rails_release_path }}/.ruby-version && echo "{{ gemset_name }}" > {{ rails_release_path }}/.ruby-gemset'
+#  become: yes
+#  become_user: '{{ user }}'
 
+- name: Create .ruby-version
+  template: src=.ruby-version.j2 dest={{ rails_release_path }}/.ruby-version owner={{ user }} group={{ user }}
+
+- name: Create .ruby-gemset
+  template: src=.ruby-gemset.j2 dest={{ rails_release_path }}/.ruby-gemset owner={{ user }} group={{ user }}
+
+- name: Copy /etc/gemrs
+  copy: src=gemrc dest=/etc/gemrc owner=root group=root mode=0644
+  when: ruby_installed|changed or gemset_created|changed
 
 - name: Install bundler if not installed
-  command: "{{ gem_bins_path }}/gem install bundler"
+  command: "{{ gem_bins_path }}/gem install bundler creates={{ gem_bins_path }}/bundle"
+  become: yes
+  become_user: '{{ user }}'
 
-- name: Install unicorn with wrapper
-  command: "{{ rvm_bin }} {{ gemset }} do gem install unicorn creates={{ gem_bins_path }}/unicorn_rails"
-
+- name: Bundle install
+  bundler: chdir="{{ rails_release_path }}" state=present deployment_mode=false executable="{{ gem_bins_path }}/bundle"
+  become: yes
+  become_user: '{{ user }}'
 

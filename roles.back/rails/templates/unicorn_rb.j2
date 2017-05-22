@@ -1,0 +1,50 @@
+
+# Sample verbose configuration file for Unicorn (not Rack)
+#
+
+# Use at least one worker per core if you're on a dedicated server,
+# more will usually help for _short_ waits on databases/caches.
+worker_processes {{ unicorn_workers|default(3) }}
+
+# Since Unicorn is never exposed to outside clients, it does not need to
+# run on the standard HTTP port (80), there is no reason to start Unicorn
+# as root unless it's from system init scripts.
+# If running the master process as root and the workers as an unprivileged
+# user, do this to switch euid/egid in the workers (also chowns logs):
+# user "unprivileged_user", "unprivileged_group"
+
+user "{{ user }}", "{{ user }}"
+
+# Help ensure your application will always spawn in the symlinked
+# "current" directory that Capistrano sets up.
+working_directory "{{ rails_current_path }}" # available in 0.94.0+
+pid "{{ rails_current_path }}/pids/unicorn.pid"
+stderr_path "{{ rails_current_path }}/log/unicorn.log"
+stdout_path "{{ rails_current_path }}/log/unicorn.log"
+
+listen "/tmp/unicorn.{{ app_name }}.sock", :backlog => 64
+
+# nuke workers after 30 seconds instead of 60 seconds (the default)
+timeout 30
+
+
+# combine Ruby 2.0.0dev or REE with "preload_app true" for memory savings
+# http://rubyenterpriseedition.com/faq.html#adapt_apps_for_cow
+preload_app true
+GC.respond_to?(:copy_on_write_friendly=) and
+    GC.copy_on_write_friendly = true
+
+before_exec do |server|
+  ENV['BUNDLE_GEMFILE'] = "{{ rails_current_path }}/Gemfile"
+end
+
+before_fork do |server, worker|
+  defined?(ActiveRecord::Base) and
+      ActiveRecord::Base.connection.disconnect!
+  # Quit the old unicorn process
+end
+
+after_fork do |server, worker|
+  defined?(ActiveRecord::Base) and
+      ActiveRecord::Base.establish_connection
+end

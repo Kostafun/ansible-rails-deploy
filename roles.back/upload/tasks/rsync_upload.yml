@@ -1,0 +1,13 @@
+- name: rsync upload static dirs
+  synchronize: src="../{{ item }}/" dest="{{ rails_path_app }}/shared/{{ item }}/" delete=yes recursive=yes
+  become: yes
+  become_user: '{{ user }}'
+  with_items: "{{ upload_dirs }}"
+  when: rsync_delete
+
+- name: rsync upload static dirs
+  synchronize: src="../{{ item }}/" dest="{{ rails_path_app }}/shared/{{ item }}/" recursive=yes
+  become: yes
+  become_user: '{{ user }}'
+  with_items: "{{ upload_dirs }}"
+  when: not rsync_delete

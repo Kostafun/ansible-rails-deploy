@@ -1,31 +1,31 @@
 ---
+- include: 'local.yml'
 
+- include: 'create_dirs.yml'
+
+- include: 'install_services.yml'
+
+- include: 'upload.yml'
+
+- include: 'link_shared.yml'
 
 - name: Detect rvm binary
   stat: path='{{ rvm_bin }}'
   register: rvm_binary
 
 - include: 'rvm.yml'
-  #when: not rvm_binary.stat.exists
-
-- name: Detect bundler
-  stat: path='{{ gem_bins_path }}/bundle'
-  register: bundler_binary
+  when: not (rvm_binary.stat is defined and rvm_binary.stat.exists)
 
 - include: 'ruby.yml'
-  become: yes
-  become_user: '{{ user }}'
-  #when: not bundler_binary.stat.exists
 
-- include: 'prepare.yml'
-  tags: ["setup"]
-  when: not skip_rails_prepare
+- include: 'rails.yml'
+  when: not (config_mongodb)
 
-- include: 'deploy.yml'
-  tags: ["deploy", "checkout"]
-  become: yes
-  become_user: "{{ user }}"
+- include: 'mongodb.yml'
+  when: config_mongodb
 
+- include: 'crontab.yml'
 
+- include: 'upload_wp_build.yml'
 
-
+- include: 'release.yml'

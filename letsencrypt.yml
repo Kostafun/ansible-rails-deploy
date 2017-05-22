@@ -1,10 +1,9 @@
 ---
-- hosts: backends
+- hosts: rails
   user: root
   roles:
     - role: thefinn93.letsencrypt
-      letsencrypt_email: 'admin@fluorine.tech'
-      letsencrypt_cert_domains:
-        - fluorine.tech
+      letsencrypt_email: '{{ config_letsencrypt_email }}'
+      letsencrypt_cert_domains: '{{ config_letsencrypt_domains }}'
       letsencrypt_renewal_command_args: '--renew-hook "systemctl restart nginx"'
-      letsencrypt_webroot_path: '/home/fluorine/fluorine1_ru/current'
+      letsencrypt_webroot_path: '{{ home }}/{{ app_name }}/current'

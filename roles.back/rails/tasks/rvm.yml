@@ -1,0 +1,29 @@
+---
+
+- name: RVM - Install rvm installer
+  get_url:
+    url: '{{ rvm_latest_installer }}'
+    dest: '/tmp/rvm-installer.sh'
+
+- name: RVM - chmod rvm installer
+  file:
+    path: '/tmp/rvm-installer.sh'
+    mode: 0755
+
+- name: RVM - Import GPG keys
+  command: 'gpg --keyserver {{ rvm_gpg_key_server }} --recv-keys {{ rvm_gpg_keys }}'
+  changed_when: False
+  become: yes
+  become_user: '{{ user }}'
+  ignore_errors: yes
+
+- name: RVM - Install rvm
+  command: >
+    /tmp/rvm-installer.sh stable --path {{ rvm_install_path }} {{ rvm_install_flags }}
+  become: yes
+  become_user: '{{ user }}'
+
+- name: RVM - Configure rvm autolibs
+  command: '{{ rvm_bin }} autolibs {{ rvm_autolib_mode }}'
+  become: yes
+  become_user: '{{ user }}'

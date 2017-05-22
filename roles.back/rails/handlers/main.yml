@@ -1,0 +1,18 @@
+---
+# handlers file for helabs.rails-deploy
+#- name: restart app
+#  service: name=unicorn-{{ app_name }} enabled=yes state=reloaded
+#  environment:
+#    RAILS_ENV: '{{ rails_env }}'
+#    GEM_HOME: "{{ gem_home }}"
+#  ignore_errors: yes
+
+- name: restart app
+  shell: RAILS_ENV={{ rails_env }} {{ env_vars }} systemctl restart unicorn-{{ app_name }}.service
+  ignore_errors: yes
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes
