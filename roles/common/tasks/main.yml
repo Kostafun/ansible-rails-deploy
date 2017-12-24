@@ -36,6 +36,7 @@
     - 'ntpdate'
     - 'openbabel'
     - 'default-jre'
+    - 'nginx-core'
 
   register: apt_install
 

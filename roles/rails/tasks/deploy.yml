@@ -20,6 +20,14 @@
   args:
     chdir: '{{ rails_release_path }}'
 
+- name: rails deploy - Create db
+  command: '{{ gem_bins_path }}/bundle exec rake db:schema:load'
+  environment:
+    RAILS_ENV: '{{ rails_env }}'
+  args:
+    chdir: '{{ rails_release_path }}'
+  when: config_first_run
+
 - name: rails deploy - db migrate
   shell: /bin/bash --login -c 'cd {{ rails_release_path }} && {{ rvm_bin }} {{ gemset }} do rake db:migrate'
   environment:
@@ -67,3 +75,7 @@
 
 - debug: msg="redis runned"
   when: not skip_redis
+
+- name: Install crontab
+  shell: /bin/bash --login -c 'cd {{ rails_release_path }} && {{ rvm_bin }} {{ gemset }} do whenever --update-crontab'
+  when: install_crontab

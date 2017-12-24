@@ -3,9 +3,9 @@
   user: root
   roles:
     - role: thefinn93.letsencrypt
-      letsencrypt_email: 'admin@bookingcashier.com'
+      letsencrypt_email: 'admin@diamondvilla.party'
       letsencrypt_cert_domains:
-        - bookary.com
-        - bookingcashier.com
+        - diamondvilla.party
+        - admin.diamondvilla.party
       letsencrypt_renewal_command_args: '--renew-hook "systemctl restart nginx"'
       letsencrypt_webroot_path: '/home/bk/bookingcashier/current'

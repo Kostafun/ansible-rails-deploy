@@ -5,11 +5,12 @@
   register: node_ver
 
 - name: webpack - compile
-  local_action: shell bash --login -c 'cd .. && NODE_ENV=production nvm exec {{ node_ver.stdout }} webpack -p --config {{ webpack_entry }}'
+  #local_action: shell bash --login -c 'cd .. && NODE_ENV=production nvm exec {{ node_ver.stdout }} webpack -p --config {{ webpack_entry }}'
+  local_action: shell bash --login -c 'cd .. && NODE_ENV=production nvm exec {{ node_ver.stdout }} npm run build'
   when: webpack_production
 
 - name: webpack - compile
-  local_action: shell bash --login -c 'cd .. && NODE_ENV=development nvm exec {{ node_ver.stdout }} webpack --config {{ webpack_entry }}'
+  local_action: shell bash --login -c 'cd .. && NODE_ENV=development nvm exec {{ node_ver.stdout }} npm run build'
   when: not webpack_production
 
 - name: webpack - remove remote public

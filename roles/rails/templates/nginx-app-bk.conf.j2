@@ -2,8 +2,9 @@ upstream {{ app_name }} {
   server unix:/tmp/unicorn.{{ app_name }}.sock fail_timeout=0;
 }
 
-proxy_cache_path /media/ram/cache levels=1:2 keys_zone=my-cache:8m max_size=1000m inactive=10d;
-proxy_temp_path /media/ram/tmp;
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=my-cache:8m max_size=1000m inactive=10d;
+proxy_temp_path /tmp;
+
 
 server {
   server_name {{ domains }};
@@ -21,6 +22,8 @@ server {
       add_header Cache-Control public;
       root {{ rails_current_path }}/public;
       try_files $uri $uri/index.html @{{ app_name }};
+
+      add_header 'Access-Control-Allow-Origin' "$http_origin";
   }
 
   location ~ /.well-known {
@@ -48,8 +51,8 @@ location ~ ^/(assets|media)/ {
   client_max_body_size 4G;
   keepalive_timeout 10;
 
-      ssl_certificate /etc/letsencrypt/live/bookary.com/fullchain.pem;
-      ssl_certificate_key /etc/letsencrypt/live/bookary.com/privkey.pem;
+      ssl_certificate /etc/letsencrypt/live/diamondvilla.party/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/diamondvilla.party/privkey.pem;
 
 
 }

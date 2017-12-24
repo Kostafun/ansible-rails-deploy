@@ -21,6 +21,7 @@
 
     - name: rails prepare - create role
       local_action: postgresql_user name={{ user }} password={{ db_pass }} role_attr_flags=CREATEDB,SUPERUSER
+      ignore_errors: yes
 
     - name: Create database on localhost
       local_action: shell createdb -T template0 {{ db_name }}
